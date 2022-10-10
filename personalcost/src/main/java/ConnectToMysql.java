@@ -24,7 +24,7 @@ public class ConnectToMysql {
             Connection connection = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false",
                     "root",
-                    "root"
+                    "123456"
             );
 
             // Create Table if not exists

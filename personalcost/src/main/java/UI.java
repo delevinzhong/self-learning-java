@@ -115,9 +115,9 @@ public class UI extends JFrame{
                 try {
                     Class.forName("com.mysql.jdbc.Driver");
                     Connection connection = DriverManager.getConnection(
-                            "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false",
+                            "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true",
                             "root",
-                            "root"
+                            "123456"
                     );
 
                     // For Insert
