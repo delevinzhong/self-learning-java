@@ -134,12 +134,13 @@ public class PersonalCostUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
 
                 try {
-                    Class.forName("com.mysql.cj.jdbc.Driver");
-                    Connection connection = DriverManager.getConnection(
-                            "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true",
-                            "root",
-                            "root"
-                    );
+//                    Class.forName("com.mysql.cj.jdbc.Driver");
+//                    Connection connection = DriverManager.getConnection(
+//                            "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true",
+//                            "root",
+//                            "123456"
+//                    );
+                    Connection connection = connectMysql(resultArea);
 
                     // For Insert
                     if (userText.getText().isEmpty()) {
@@ -153,9 +154,9 @@ public class PersonalCostUI extends JFrame {
                             currentDate = dateFormat.format(date);
                         }
                         String query = String.format("INSERT INTO `%s` VALUES (`%s`, `%s`, `%s`, `%s`);",
-                                ConnectToMysql.TABLE_NAME, costItem, cost, costType, currentDate);
-                        ConnectToMysql.insertNewRecord(connection, currentDate, costItem, cost, costType,
-                                ConnectToMysql.TABLE_NAME);
+                                MySqlUtils.TABLE, costItem, cost, costType, currentDate);
+                        MySqlUtils.insertNewRecord(connection, currentDate, costItem, cost, costType,
+                                MySqlUtils.TABLE);
                         resultArea.append(query + "\n");
                     } else {
                         // For custom query
@@ -164,13 +165,13 @@ public class PersonalCostUI extends JFrame {
                             customQuery = getCusSumMont(customQuery, resultArea);
                         }
 
-                        ResultSet rs = ConnectToMysql.queryCostTable(connection, customQuery);
+                        ResultSet rs = MySqlUtils.queryCostTable(connection, customQuery);
                         List<Object> list = convertList(rs);
                         for (Object l : list) {
                             resultArea.append(l + "\n");
                         }
                     }
-                } catch (SQLException | ClassNotFoundException sqlException) {
+                } catch (SQLException sqlException) {
                     resultArea.append(sqlException + "\n");
                     sqlException.printStackTrace();
                 }
@@ -186,10 +187,10 @@ public class PersonalCostUI extends JFrame {
         jButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Connection connection = connectMysql();
+                Connection connection = connectMysql(resultArea);
                 String query = String.format(SUMMONTHCOST, firstDay, lastDay);
                 try {
-                    ResultSet resultSet = ConnectToMysql.queryCostTable(connection, query);
+                    ResultSet resultSet = MySqlUtils.queryCostTable(connection, query);
                     List<Object> list = convertList(resultSet);
                     for (Object l : list) {
                         resultArea.append("月份：" + curMonFirLasDayList.get(3) + "\n");
@@ -202,17 +203,18 @@ public class PersonalCostUI extends JFrame {
         });
     }
 
-    private static Connection connectMysql() {
+    private static Connection connectMysql(JTextArea resultArea) {
         Connection connection = null;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true",
                     "root",
-                    "root"
+                    "123456"
             );
 
         } catch (SQLException | ClassNotFoundException sqlException) {
+            resultArea.append(sqlException + "\n");
             sqlException.printStackTrace();
         }
         return connection;
