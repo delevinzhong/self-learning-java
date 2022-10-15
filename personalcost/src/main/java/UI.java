@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UI extends JFrame{
+public class UI extends JFrame {
 
     public static void main(String[] args) {
 //        javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -29,6 +29,7 @@ public class UI extends JFrame{
 
         frame.setVisible(true);
     }
+
     public static void placeComponents(JPanel panel) {
         panel.setLayout(null);
 
@@ -99,25 +100,31 @@ public class UI extends JFrame{
         panel.add(resultLabel);
 
         // Result test area
-        JTextArea resultTextArea = new JTextArea();
-        resultTextArea.setBounds(100, 210, 750, 500);
+//        JTextArea resultTextArea = new JTextArea();
+//        resultTextArea.setBounds(100, 210, 750, 500);
 //        resultTextArea.setLineWrap(true);
 //        JScrollPane scrollPane = new JScrollPane(resultTextArea);
 //        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 //        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 //        panel.add(scrollPane);
-        panel.add(resultTextArea);
+//        panel.add(resultTextArea);
+
+        JTextArea resultArea = new JTextArea();
+        JScrollPane sp = new JScrollPane(resultArea);
+        sp.setBounds(100, 210, 750, 500);
+        panel.add(sp);
+
 
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
 
                 try {
-                    Class.forName("com.mysql.jdbc.Driver");
+                    Class.forName("com.mysql.cj.jdbc.Driver");
                     Connection connection = DriverManager.getConnection(
                             "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true",
                             "root",
-                            "123456"
+                            "root"
                     );
 
                     // For Insert
@@ -135,14 +142,14 @@ public class UI extends JFrame{
                                 ConnectToMysql.TABLE_NAME, costItem, cost, costType, currentDate);
                         ConnectToMysql.insertNewRecord(connection, currentDate, costItem, cost, costType,
                                 ConnectToMysql.TABLE_NAME);
-                        resultTextArea.append(query + "\n");
+                        resultArea.append(query + "\n");
                     } else {
                         // For custom query
                         String customQuery = userText.getText();
                         ResultSet rs = ConnectToMysql.queryCostTable(connection, customQuery);
                         List<Object> list = convertList(rs);
                         for (Object l : list) {
-                            resultTextArea.append(l + "\n");
+                            resultArea.append(l + "\n");
                             // select * from cost_center.personal_cost order by currentDate desc;
                         }
                     }

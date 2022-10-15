@@ -19,12 +19,14 @@ public class ConnectToMysql {
 
         LOG.info("----------------------------Connect TO MySQL----------------------------");
 
+        // Passwd : root (Home PC)
+        // Passwd : 1234 (Laptop)
         try{
             Class.forName("com.mysql.jdbc.Driver");
             Connection connection = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false",
                     "root",
-                    "123456"
+                    "root"
             );
 
             // Create Table if not exists
