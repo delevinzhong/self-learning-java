@@ -1,6 +1,8 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -205,12 +207,26 @@ public class PersonalCostUI extends JFrame {
 
     private static Connection connectMysql(JTextArea resultArea) {
         Connection connection = null;
+        String password = "";
+        try {
+            String hostname = InetAddress.getLocalHost().getCanonicalHostName();
+            System.out.println(hostname);
+            if (hostname.equals("LAPTOP-ETF2FTFQ")) {
+                password = "123456";
+                System.out.println(password);
+            } else {
+                password = "root";
+                System.out.println(password);
+            }
+        } catch (Exception e) {
+            resultArea.append(e + "\n");
+        }
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             connection = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/cost_center?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true",
                     "root",
-                    "123456"
+                    password
             );
 
         } catch (SQLException | ClassNotFoundException sqlException) {

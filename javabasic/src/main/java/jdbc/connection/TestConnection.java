@@ -14,14 +14,14 @@ public class TestConnection {
     @Test
     public void testConnection1() throws SQLException {
 
-        Driver driver = new com.mysql.jdbc.Driver();
+//        Driver driver = new com.mysql.jdbc.Driver();
         String url = "jdbc:mysql://localhost:3306/cost_center";
         Properties properties = new Properties();
         properties.setProperty("user", "root");
         properties.setProperty("password", "root@1234");
 
-        Connection conn = driver.connect(url, properties);
-        System.out.println(conn);
+//        Connection conn = driver.connect(url, properties);
+//        System.out.println(conn);
     }
 
     @Test
