@@ -19,6 +19,8 @@ public class PersonalCostUI extends JFrame {
     private static final int HEIGHTBUTTON = 25;
     private static final String SUMMONTHCOST = "SELECT SUM(cost) FROM personal_cost WHERE currentDate BETWEEN " +
             "'%s 00:00:00' AND '%s 23:59:59';";
+    private static final String HSBCMONTHCOST = "SELECT SUM(cost) FROM personal_cost WHERE currentDate BETWEEN " +
+            "'%s-20 00:00:00' AND '%s-20 23:59:59'";
 
 
     public static void main(String[] args) {
@@ -97,6 +99,11 @@ public class PersonalCostUI extends JFrame {
         sumCurMonthButton.setBounds(335, 170, WIDTHBUTTON, HEIGHTBUTTON);
         panel.add(sumCurMonthButton);
 
+        JButton hsbcSumMonthButton = new JButton("HSBC月总计");
+        hsbcSumMonthButton.setBounds(505, 170, WIDTHBUTTON, HEIGHTBUTTON);
+        panel.add(hsbcSumMonthButton);
+
+
         // Result Label
         JLabel resultLabel = new JLabel("输出");
         resultLabel.setBounds(XLABEL, 210, 80, HEIGHTLABEL);
@@ -111,6 +118,8 @@ public class PersonalCostUI extends JFrame {
         runButtonAction(runButton, userText, costItemText, costText, costTypeText, dateText, resultArea);
 
         sumCurMonthButtonAction(sumCurMonthButton, resultArea);
+
+        sumHsbcMonthButtonAction(hsbcSumMonthButton, resultArea);
 
     }
 
@@ -167,10 +176,21 @@ public class PersonalCostUI extends JFrame {
                             customQuery = getCusSumMont(customQuery, resultArea);
                         }
 
+                        // select * from personal_cost order by currentDate desc;
                         ResultSet rs = MySqlUtils.queryCostTable(connection, customQuery);
                         List<Object> list = convertList(rs);
+                        String title = "Cost,CostType,CurrentDate,CostItem";
+                        resultArea.append(title + "\n");
                         for (Object l : list) {
-                            resultArea.append(l + "\n");
+                            // s = {cost=445.79, costType=娱乐, currentDate=2022-10-25, costItem=14pro手机还款}
+                            String s = String.valueOf(l).replace("{", "")
+                                    .replace("}", "")
+                                    .replace("cost=", "")
+                                    .replace("costType=", "")
+                                    .replace("currentDate=", "")
+                                    .replace("costItem=", "");
+                            resultArea.append(s + "\n");
+//                            resultArea.append(l + "\n");
                         }
                     }
                 } catch (SQLException sqlException) {
@@ -205,18 +225,52 @@ public class PersonalCostUI extends JFrame {
         });
     }
 
+    // TODO : 给按键HSBC月总计写相关功能，要求查询结果为从上个月20号到本月20号的花费总和
+    private static void sumHsbcMonthButtonAction(JButton jButton, JTextArea resultArea) {
+        ArrayList<String> curMonFirLasDayList = getCurrentDate();
+        String year = curMonFirLasDayList.get(2);
+        String month = curMonFirLasDayList.get(3);
+        String curYearMonth = String.format("%s-%s", year, month);
+        int lastMonth;
+        if (!month.equals("1")) {
+            lastMonth = Integer.parseInt(month) - 1;
+        } else {
+            lastMonth = 12;
+            year = Integer.parseInt(year) - 1 + "";
+        }
+        String lastYearMonth = String.format("%s-%d", year, lastMonth);
+        jButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Connection connection = connectMysql(resultArea);
+                String query = String.format(HSBCMONTHCOST, lastYearMonth, curYearMonth);
+                try {
+                    ResultSet resultSet = MySqlUtils.queryCostTable(connection, query);
+                    List<Object> list = convertList(resultSet);
+                    for (Object l : list) {
+//                        System.out.println(query);
+                        resultArea.append("HSBC月份：" + lastYearMonth + "-20 : " + curYearMonth + "-20" + "\n");
+                        resultArea.append(l + "\n");
+                    }
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        });
+    }
+
     private static Connection connectMysql(JTextArea resultArea) {
         Connection connection = null;
         String password = "";
         try {
             String hostname = InetAddress.getLocalHost().getCanonicalHostName();
-            System.out.println(hostname);
+//            System.out.println(hostname);
             if (hostname.equals("LAPTOP-ETF2FTFQ")) {
                 password = "123456";
-                System.out.println(password);
+//                System.out.println(password);
             } else {
                 password = "root";
-                System.out.println(password);
+//                System.out.println(password);
             }
         } catch (Exception e) {
             resultArea.append(e + "\n");
