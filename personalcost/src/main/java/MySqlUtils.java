@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
 
 public class MySqlUtils {
 
@@ -22,7 +23,7 @@ public class MySqlUtils {
         statement.execute(insertQuery);
     }
 
-    public static void coreateCostTable(Connection conn, String tableName) throws SQLException {
+    public static void createCostTable(Connection conn, String tableName) throws SQLException {
 //        LOG.info("Creating {} table", tableName);
         String createStmt = String.format("CREATE TABLE IF NOT EXISTS `%s` (  \n" +
                 "  `costItem` varchar(20) NOT NULL,  \n" +
@@ -39,7 +40,13 @@ public class MySqlUtils {
 
     public static ResultSet queryCostTable(Connection connection, String query) throws SQLException {
 //        LOG.info("Execute query {}", query);
+
         Statement stmt = connection.createStatement();
         return stmt.executeQuery(query);
+    }
+
+    public static int updateCostTable(Connection connection, String query) throws SQLException {
+        Statement stmt = connection.createStatement();
+        return stmt.executeUpdate(query);
     }
 }
