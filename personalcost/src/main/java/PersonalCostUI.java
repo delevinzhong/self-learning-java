@@ -118,6 +118,7 @@ public class PersonalCostUI extends JFrame {
         JTextArea resultArea = new JTextArea();
         JScrollPane sp = new JScrollPane(resultArea);
         sp.setBounds(XTEXT, 210, 750, 500);
+        resultArea.append("CostType : 娱乐，食，其他，行，住，医疗，结婚，旅游，礼物，人情世故，衣");
         panel.add(sp);
 
         runButtonAction(runButton, userText, costItemText, costText, costTypeText, dateText, resultArea);
@@ -188,8 +189,8 @@ public class PersonalCostUI extends JFrame {
                         if (customQuery.toLowerCase().startsWith("select")) {
                             ResultSet rs = MySqlUtils.queryCostTable(connection, customQuery);
                             List<Object> list = convertList(rs);
-                            String title = "Cost,CostType,CurrentDate,CostItem";
-                            resultArea.append(title + "\n");
+//                            String title = "Cost,CostType,CurrentDate,CostItem";
+//                            resultArea.append(title + "\n");
                             for (Object l : list) {
                                 // s = {cost=445.79, costType=娱乐, currentDate=2022-10-25, costItem=14pro手机还款}
                                 String s = String.valueOf(l).replace("{", "")
