@@ -46,7 +46,7 @@ public class PersonalCostUI extends JFrame {
         panel.add(inputLabel);
         // INPUT Text
         JTextField userText = new JTextField(20);
-        userText.setBounds(XTEXT, 20, 750, HEIGHTTEXT);
+        userText.setBounds(XTEXT, 20, 810, HEIGHTTEXT);
         panel.add(userText);
 
 
@@ -85,9 +85,24 @@ public class PersonalCostUI extends JFrame {
         JTextField costTypeText = new JTextField(20);
         costTypeText.setBounds(XTEXT, 140, 150, HEIGHTTEXT);
         panel.add(costTypeText);
+        // CostType combo box
+        JComboBox costTypeComboBox = new JComboBox();
+        costTypeComboBox.setBounds(XTEXT + 165, 140, 150, HEIGHTTEXT);
+        costTypeComboBox.addItem("--选择--");
+        costTypeComboBox.addItem("衣");
+        costTypeComboBox.addItem("食");
+        costTypeComboBox.addItem("住");
+        costTypeComboBox.addItem("行");
+        costTypeComboBox.addItem("娱乐");
+        costTypeComboBox.addItem("医疗");
+        costTypeComboBox.addItem("旅游");
+        costTypeComboBox.addItem("礼物");
+        costTypeComboBox.addItem("人情世故");
+        costTypeComboBox.addItem("其他");
+        panel.add(costTypeComboBox);
 
         // Create Run button
-        JButton runButton = new JButton("运行");  
+        JButton runButton = new JButton("运行");
         runButton.setBounds(170, 170, WIDTHBUTTON, HEIGHTBUTTON);
         panel.add(runButton);
 
@@ -108,6 +123,10 @@ public class PersonalCostUI extends JFrame {
         detailForTodayButton.setBounds(665, 170, WIDTHBUTTON, HEIGHTBUTTON);
         panel.add(detailForTodayButton);
 
+        JButton deleteLastRecordButton = new JButton("删除上条记录");
+        deleteLastRecordButton.setBounds(830, 170, WIDTHBUTTON, HEIGHTBUTTON);
+        panel.add(deleteLastRecordButton);
+
 
         // Result Label
         JLabel resultLabel = new JLabel("日志");
@@ -117,17 +136,19 @@ public class PersonalCostUI extends JFrame {
         // Result test area
         JTextArea resultArea = new JTextArea();
         JScrollPane sp = new JScrollPane(resultArea);
-        sp.setBounds(XTEXT, 210, 750, 500);
-        resultArea.append("CostType : 娱乐，食，其他，行，住，医疗，结婚，旅游，礼物，人情世故，衣");
+        sp.setBounds(XTEXT, 210, 810, 500);
+//        resultArea.append("CostType : 娱乐，食，其他，行，住，医疗，结婚，旅游，礼物，人情世故，衣");
         panel.add(sp);
 
-        runButtonAction(runButton, userText, costItemText, costText, costTypeText, dateText, resultArea);
+        runButtonAction(runButton, userText, costItemText, costText, costTypeText, dateText, resultArea, costTypeComboBox);
 
         sumCurMonthButtonAction(sumCurMonthButton, resultArea);
 
         sumHsbcMonthButtonAction(hsbcSumMonthButton, resultArea);
 
         detailForTodayButtonAction(detailForTodayButton, resultArea);
+
+        deleteLastRecordButtonAction(deleteLastRecordButton, resultArea, costItemText, costText, costTypeText, dateText, costTypeComboBox);
 
     }
 
@@ -145,9 +166,43 @@ public class PersonalCostUI extends JFrame {
         return list;
     }
 
+    private static void deleteLastRecordButtonAction(JButton deleteLastRecordButton, JTextArea resultArea,
+                                                     JTextField costItemText, JTextField costText,
+                                                     JTextField costTypeText, JTextField dateText,
+                                                     JComboBox costTypeComboBox) {
+        deleteLastRecordButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String currentDate = dateText.getText();
+                    if (dateText.getText().isEmpty()) {
+                        java.util.Date date = new Date();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        currentDate = dateFormat.format(date);
+                    }
+                    String costItem = costItemText.getText();
+                    String cost = costText.getText();
+                    String costType = costTypeText.getText();
+                    if (costType.isEmpty()) {
+                        costType = (String) costTypeComboBox.getSelectedItem();
+                    }
+                    String deleteQuery = String.format("DELETE FROM personal_cost WHERE currentDate = \"%s\" AND " +
+                            "costItem = \"%s\" AND " +
+                            "cost = \"%s\" " +
+                            "AND costType = \"%s\";", currentDate, costItem, cost, costType);
+                    Connection connection = connectMysql(resultArea);
+                    resultArea.append(deleteQuery + "\n");
+                    MySqlUtils.updateCostTable(connection, deleteQuery);
+                } catch (SQLException sqlException) {
+                    resultArea.append(sqlException + "\n");
+                }
+            }
+        });
+    }
+
     private static void runButtonAction(JButton runButton, JTextField userText, JTextField costItemText,
                                         JTextField costText, JTextField costTypeText, JTextField dateText,
-                                        JTextArea resultArea) {
+                                        JTextArea resultArea, JComboBox costTypeComboBox) {
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -166,6 +221,10 @@ public class PersonalCostUI extends JFrame {
                         String costItem = costItemText.getText();
                         String cost = costText.getText();
                         String costType = costTypeText.getText();
+                        Object selectedItem = costTypeComboBox.getSelectedItem();
+                        if (costType.equals("")) {
+                            costType = (String) selectedItem;
+                        }
                         java.util.Date date = new Date();
                         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                         String currentDate = dateText.getText();
@@ -181,7 +240,7 @@ public class PersonalCostUI extends JFrame {
                         // For custom query
                         String customQuery = userText.getText();
                         // 在自定义查询中输入月份， 如输入1点击运行，结果返回1月总计
-                        if (customQuery.length() == 1){
+                        if (customQuery.length() == 1 || customQuery.length() == 2){
                             customQuery = getCusSumMont(customQuery, resultArea);
                         }
 
@@ -202,9 +261,9 @@ public class PersonalCostUI extends JFrame {
                                 resultArea.append(s + "\n");
 //                            resultArea.append(l + "\n");
                             }
-                        } else if (customQuery.toLowerCase().startsWith("update")) {
+                        } else if (customQuery.toLowerCase().startsWith("update") || customQuery.toLowerCase().startsWith("delete")) {
                             int returnValue = MySqlUtils.updateCostTable(connection, customQuery);
-                            resultArea.append("Update SQL return " + returnValue + "\n");
+                            resultArea.append(returnValue + "records updated" + "\n");
                         }
 
                     }
