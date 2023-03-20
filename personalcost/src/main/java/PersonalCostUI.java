@@ -333,11 +333,11 @@ public class PersonalCostUI extends JFrame {
     }
 
     private static void detailForTodayButtonAction(JButton jButton, JTextArea resultArea) {
-        Calendar instance = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         jButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                Calendar instance = Calendar.getInstance();
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                 String today = format.format(instance.getTime());
                 Connection connection = connectMysql(resultArea);
                 String query = String.format(DETAILTODAY, today);
